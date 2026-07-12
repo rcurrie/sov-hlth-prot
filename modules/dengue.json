@@ -1,0 +1,192 @@
+{
+  "name": "Dengue (El Salvador)",
+  "remarks": [
+    "Endemic arboviral disease, seasonal (rainy season May-Oct) with epidemic years.",
+    "Calibrated to MINSAL surveillance / PAHO: ~900 symptomatic cases per 100k/yr (knob:",
+    "Infection_Roll), ~3% of symptomatic cases progress to severe (knob: Severity_Branch).",
+    "Lifelong recurrent risk: the module loops back to the annual cycle after recovery.",
+    "VOCAB CAVEAT: severe dengue coded with SNOMED 409708008 (dengue haemorrhagic fever);",
+    "The source health system codes diagnoses in ICD-11 (1D2x), mapping handled downstream in FHIR->OMOP."
+  ],
+  "states": {
+    "Initial": { "type": "Initial", "direct_transition": "Annual_Wait" },
+
+    "Annual_Wait": {
+      "type": "Delay",
+      "exact": { "quantity": 1, "unit": "years" },
+      "direct_transition": "Infection_Roll"
+    },
+
+    "Infection_Roll": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "Symptom_Encounter", "distribution": 0.009 },
+        { "transition": "Annual_Wait", "distribution": 0.991 }
+      ]
+    },
+
+    "Symptom_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "reason": "dengue_infection",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "185345009", "display": "Encounter for symptom" }
+      ],
+      "direct_transition": "Dengue_Condition"
+    },
+
+    "Dengue_Condition": {
+      "type": "ConditionOnset",
+      "target_encounter": "Symptom_Encounter",
+      "assign_to_attribute": "dengue_infection",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "38362002", "display": "Dengue" }
+      ],
+      "direct_transition": "Fever_Symptom"
+    },
+
+    "Fever_Symptom": {
+      "type": "Symptom",
+      "symptom": "Fever",
+      "cause": "Dengue",
+      "range": { "low": 40, "high": 90 },
+      "direct_transition": "Headache_Symptom"
+    },
+    "Headache_Symptom": {
+      "type": "Symptom",
+      "symptom": "Headache",
+      "cause": "Dengue",
+      "range": { "low": 30, "high": 70 },
+      "direct_transition": "Myalgia_Symptom"
+    },
+    "Myalgia_Symptom": {
+      "type": "Symptom",
+      "symptom": "Muscle pain",
+      "cause": "Dengue",
+      "range": { "low": 30, "high": 70 },
+      "direct_transition": "Temperature_Obs"
+    },
+
+    "Temperature_Obs": {
+      "type": "Observation",
+      "category": "vital-signs",
+      "unit": "Cel",
+      "codes": [
+        { "system": "LOINC", "code": "8310-5", "display": "Body temperature" }
+      ],
+      "range": { "low": 38.5, "high": 40.5 },
+      "direct_transition": "Platelet_Obs"
+    },
+    "Platelet_Obs": {
+      "type": "Observation",
+      "category": "laboratory",
+      "unit": "10*3/uL",
+      "codes": [
+        { "system": "LOINC", "code": "26515-7", "display": "Platelets [#/volume] in Blood" }
+      ],
+      "range": { "low": 90, "high": 150 },
+      "direct_transition": "Severity_Branch"
+    },
+
+    "Severity_Branch": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "Severe_Dengue", "distribution": 0.03 },
+        { "transition": "Supportive_Care", "distribution": 0.97 }
+      ]
+    },
+
+    "Supportive_Care": {
+      "type": "MedicationOrder",
+      "codes": [
+        { "system": "RxNorm", "code": "161", "display": "Acetaminophen" }
+      ],
+      "direct_transition": "End_Ambulatory_Encounter"
+    },
+    "End_Ambulatory_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Recovery_Delay"
+    },
+    "Recovery_Delay": {
+      "type": "Delay",
+      "range": { "low": 7, "high": 14, "unit": "days" },
+      "direct_transition": "Resolve_Dengue"
+    },
+    "Resolve_Dengue": {
+      "type": "ConditionEnd",
+      "condition_onset": "Dengue_Condition",
+      "direct_transition": "Annual_Wait"
+    },
+
+    "Severe_Dengue": {
+      "type": "ConditionOnset",
+      "target_encounter": "Symptom_Encounter",
+      "assign_to_attribute": "severe_dengue",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "409708008", "display": "Dengue haemorrhagic fever" }
+      ],
+      "direct_transition": "End_Pre_Admission_Encounter"
+    },
+    "End_Pre_Admission_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Hospital_Admission"
+    },
+    "Hospital_Admission": {
+      "type": "Encounter",
+      "encounter_class": "inpatient",
+      "reason": "severe_dengue",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "32485007", "display": "Hospital admission" }
+      ],
+      "direct_transition": "Severe_Platelet_Obs"
+    },
+    "Severe_Platelet_Obs": {
+      "type": "Observation",
+      "category": "laboratory",
+      "unit": "10*3/uL",
+      "codes": [
+        { "system": "LOINC", "code": "26515-7", "display": "Platelets [#/volume] in Blood" }
+      ],
+      "range": { "low": 10, "high": 50 },
+      "direct_transition": "IV_Fluids"
+    },
+    "IV_Fluids": {
+      "type": "Procedure",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "432102000", "display": "Administration of substance via intravenous route" }
+      ],
+      "direct_transition": "Severe_Outcome"
+    },
+    "Severe_Outcome": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "Dengue_Death", "distribution": 0.01 },
+        { "transition": "Severe_Recovery", "distribution": 0.99 }
+      ]
+    },
+    "Dengue_Death": {
+      "type": "Death",
+      "exact": { "quantity": 2, "unit": "days" },
+      "condition_onset": "Severe_Dengue",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "409708008", "display": "Dengue haemorrhagic fever" }
+      ],
+      "direct_transition": "Terminal"
+    },
+    "Severe_Recovery": {
+      "type": "EncounterEnd",
+      "direct_transition": "Severe_Recovery_Delay"
+    },
+    "Severe_Recovery_Delay": {
+      "type": "Delay",
+      "range": { "low": 10, "high": 21, "unit": "days" },
+      "direct_transition": "Resolve_Severe"
+    },
+    "Resolve_Severe": {
+      "type": "ConditionEnd",
+      "condition_onset": "Severe_Dengue",
+      "direct_transition": "Resolve_Dengue"
+    },
+    "Terminal": { "type": "Terminal" }
+  }
+}

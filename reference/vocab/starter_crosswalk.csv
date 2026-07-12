@@ -1,0 +1,22 @@
+source_vocabulary,source_code,source_name,standard_concept_id,standard_concept_name,status
+# Validated: standard OMOP concept_ids we are confident of (present in the starter concept table).
+SNOMED,44054006,Type 2 diabetes mellitus,201826,Type 2 diabetes mellitus,mapped
+LOINC,4548-4,Hemoglobin A1c/Hemoglobin.total in Blood,3004410,Hemoglobin A1c/Hemoglobin.total in Blood,mapped
+# TODO: high-value SV codes awaiting an Athena/Usagi mapping pass. standard_concept_id=0
+# keeps them honestly UNMAPPED (they show up in the coverage metric) rather than guessed.
+LOINC,33914-3,Estimated glomerular filtration rate (eGFR),0,,todo-athena
+LOINC,2160-0,Creatinine [mass/volume] in Serum or Plasma,0,,todo-athena
+LOINC,2339-0,Glucose [mass/volume] in Blood,0,,todo-athena
+LOINC,39156-5,Body mass index (BMI),0,,todo-athena
+SNOMED,431855005,Chronic kidney disease stage 1,0,,todo-athena
+SNOMED,431856006,Chronic kidney disease stage 2,0,,todo-athena
+SNOMED,433144002,Chronic kidney disease stage 3,0,,todo-athena
+SNOMED,431857002,Chronic kidney disease stage 4,0,,todo-athena
+SNOMED,46177005,End-stage renal disease,0,,todo-athena
+SNOMED,709044004,Chronic kidney disease,0,,todo-athena
+SNOMED,59621000,Essential hypertension,0,,todo-athena
+SNOMED,38362002,Dengue,0,,todo-athena
+RxNorm,860975,Metformin extended-release oral tablet,0,,todo-athena
+RxNorm,106892,Insulin,0,,todo-athena
+RxNorm,314076,Lisinopril,0,,todo-athena
+RxNorm,310798,Hydrochlorothiazide,0,,todo-athena

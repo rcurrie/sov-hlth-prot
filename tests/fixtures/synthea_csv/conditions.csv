@@ -1,0 +1,4 @@
+START,STOP,PATIENT,ENCOUNTER,CODE,DESCRIPTION
+2020-01-10,,aaaa-1111,enc-1,44054006,Diabetes mellitus type 2
+2020-06-15,,aaaa-1111,enc-2,59621000,Hypertension
+2020-03-01,2020-03-02,bbbb-2222,enc-3,44054006,Diabetes mellitus type 2

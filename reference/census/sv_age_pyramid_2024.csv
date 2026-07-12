@@ -1,0 +1,13 @@
+age_band,sex,fraction,source,confidence
+0-17,M,0.158,RGPV-2024-BCR,approx
+0-17,F,0.151,RGPV-2024-BCR,approx
+18-29,M,0.108,RGPV-2024-BCR,approx
+18-29,F,0.106,RGPV-2024-BCR,approx
+30-44,M,0.099,RGPV-2024-BCR,approx
+30-44,F,0.106,RGPV-2024-BCR,approx
+45-59,M,0.067,RGPV-2024-BCR,approx
+45-59,F,0.078,RGPV-2024-BCR,approx
+60-74,M,0.040,RGPV-2024-BCR,approx
+60-74,F,0.049,RGPV-2024-BCR,approx
+75+,M,0.014,RGPV-2024-BCR,approx
+75+,F,0.024,RGPV-2024-BCR,approx

@@ -1,0 +1,256 @@
+{
+  "name": "CKDu / Mesoamerican Nephropathy (El Salvador)",
+  "remarks": [
+    "Chronic kidney disease of non-traditional/unknown etiology (CKDu), a.k.a. Mesoamerican",
+    "nephropathy. A leading cause of death among young male agricultural workers in the hot",
+    "Pacific lowlands (canonical hotspot: Bajo Lempa - Usulutan/La Paz/San Vicente).",
+    "Non-diabetic, non-hypertensive; progressive loss of eGFR to ESRD.",
+    "",
+    "RISK TARGETING: this module honors a per-patient boolean attribute 'ckdu_high_risk'.",
+    "The intended Phase-1 persona-binding step sets it for male agricultural workers in",
+    "hotspot departments (occupation + department come straight from the Nemotron spine).",
+    "Stock Synthea leaves it unset -> patients fall to the male/female national baseline.",
+    "",
+    "VOCAB CAVEAT: there is no clean SNOMED concept for Mesoamerican nephropathy; we code the",
+    "generic CKD / ESRD ladder. The etiology distinction is exactly the kind of ICD-11->OMOP",
+    "mapping problem flagged for the FHIR->OMOP stage (Phase 2)."
+  ],
+  "states": {
+    "Initial": { "type": "Initial", "direct_transition": "Wait_Until_Adult" },
+
+    "Wait_Until_Adult": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Age",
+        "operator": ">=",
+        "quantity": 18,
+        "unit": "years"
+      },
+      "direct_transition": "Onset_Window"
+    },
+
+    "Onset_Window": {
+      "type": "Delay",
+      "remarks": ["Spread incident onset across young-adult years (age ~18-45)."],
+      "range": { "low": 0, "high": 7, "unit": "years" },
+      "direct_transition": "Risk_Stratify"
+    },
+
+    "Risk_Stratify": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              { "condition_type": "Gender", "gender": "M" },
+              { "condition_type": "Attribute", "attribute": "ckdu_high_risk", "operator": "==", "value": true }
+            ]
+          },
+          "transition": "Roll_High_Risk"
+        },
+        { "condition": { "condition_type": "Gender", "gender": "M" }, "transition": "Roll_Male_Baseline" },
+        { "transition": "Roll_Female_Baseline" }
+      ]
+    },
+
+    "Roll_High_Risk": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "CKDu_Encounter", "distribution": 0.18 },
+        { "transition": "No_CKDu", "distribution": 0.82 }
+      ]
+    },
+    "Roll_Male_Baseline": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "CKDu_Encounter", "distribution": 0.06 },
+        { "transition": "No_CKDu", "distribution": 0.94 }
+      ]
+    },
+    "Roll_Female_Baseline": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "CKDu_Encounter", "distribution": 0.04 },
+        { "transition": "No_CKDu", "distribution": 0.96 }
+      ]
+    },
+    "No_CKDu": { "type": "Terminal" },
+
+    "CKDu_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "reason": "ckdu",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "185345009", "display": "Encounter for symptom" }
+      ],
+      "direct_transition": "CKDu_Condition"
+    },
+    "CKDu_Condition": {
+      "type": "ConditionOnset",
+      "target_encounter": "CKDu_Encounter",
+      "assign_to_attribute": "ckdu",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "709044004", "display": "Chronic kidney disease (CKD of non-traditional/unknown etiology)" }
+      ],
+      "direct_transition": "Stage2_eGFR"
+    },
+
+    "Stage2_eGFR": {
+      "type": "Observation",
+      "category": "laboratory",
+      "unit": "mL/min/{1.73_m2}",
+      "codes": [
+        { "system": "LOINC", "code": "33914-3", "display": "Estimated glomerular filtration rate" }
+      ],
+      "range": { "low": 60, "high": 89 },
+      "direct_transition": "Stage2_Creatinine"
+    },
+    "Stage2_Creatinine": {
+      "type": "Observation",
+      "category": "laboratory",
+      "unit": "mg/dL",
+      "codes": [
+        { "system": "LOINC", "code": "2160-0", "display": "Creatinine [Mass/volume] in Serum or Plasma" }
+      ],
+      "range": { "low": 1.2, "high": 1.6 },
+      "direct_transition": "End_CKDu_Encounter"
+    },
+    "End_CKDu_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Progress_To_Stage3"
+    },
+
+    "Progress_To_Stage3": {
+      "type": "Delay",
+      "range": { "low": 1, "high": 4, "unit": "years" },
+      "direct_transition": "Stage3_Encounter"
+    },
+    "Stage3_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "reason": "ckdu",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "390906007", "display": "Follow-up encounter" }
+      ],
+      "direct_transition": "Stage3_eGFR"
+    },
+    "Stage3_eGFR": {
+      "type": "Observation",
+      "category": "laboratory",
+      "unit": "mL/min/{1.73_m2}",
+      "codes": [
+        { "system": "LOINC", "code": "33914-3", "display": "Estimated glomerular filtration rate" }
+      ],
+      "range": { "low": 30, "high": 59 },
+      "direct_transition": "End_Stage3_Encounter"
+    },
+    "End_Stage3_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Progress_To_Stage4"
+    },
+
+    "Progress_To_Stage4": {
+      "type": "Delay",
+      "range": { "low": 1, "high": 4, "unit": "years" },
+      "direct_transition": "Stage4_Encounter"
+    },
+    "Stage4_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "reason": "ckdu",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "390906007", "display": "Follow-up encounter" }
+      ],
+      "direct_transition": "Stage4_eGFR"
+    },
+    "Stage4_eGFR": {
+      "type": "Observation",
+      "category": "laboratory",
+      "unit": "mL/min/{1.73_m2}",
+      "codes": [
+        { "system": "LOINC", "code": "33914-3", "display": "Estimated glomerular filtration rate" }
+      ],
+      "range": { "low": 15, "high": 29 },
+      "direct_transition": "End_Stage4_Encounter"
+    },
+    "End_Stage4_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Progress_To_ESRD"
+    },
+
+    "Progress_To_ESRD": {
+      "type": "Delay",
+      "range": { "low": 1, "high": 3, "unit": "years" },
+      "direct_transition": "ESRD_Encounter"
+    },
+    "ESRD_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "inpatient",
+      "reason": "ckdu",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "32485007", "display": "Hospital admission" }
+      ],
+      "direct_transition": "ESRD_Condition"
+    },
+    "ESRD_Condition": {
+      "type": "ConditionOnset",
+      "target_encounter": "ESRD_Encounter",
+      "assign_to_attribute": "ckdu_esrd",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "46177005", "display": "End-stage renal disease" }
+      ],
+      "direct_transition": "ESRD_eGFR"
+    },
+    "ESRD_eGFR": {
+      "type": "Observation",
+      "category": "laboratory",
+      "unit": "mL/min/{1.73_m2}",
+      "codes": [
+        { "system": "LOINC", "code": "33914-3", "display": "Estimated glomerular filtration rate" }
+      ],
+      "range": { "low": 4, "high": 14 },
+      "direct_transition": "Treatment_Branch"
+    },
+    "Treatment_Branch": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "Start_Dialysis", "distribution": 0.55 },
+        { "transition": "No_Dialysis", "distribution": 0.45 }
+      ]
+    },
+    "Start_Dialysis": {
+      "type": "Procedure",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "265764009", "display": "Renal dialysis" }
+      ],
+      "direct_transition": "End_ESRD_Encounter"
+    },
+    "No_Dialysis": {
+      "type": "EncounterEnd",
+      "direct_transition": "Mortality_Roll"
+    },
+    "End_ESRD_Encounter": {
+      "type": "EncounterEnd",
+      "direct_transition": "Mortality_Roll"
+    },
+    "Mortality_Roll": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "transition": "CKDu_Death", "distribution": 0.40 },
+        { "transition": "Survive_ESRD", "distribution": 0.60 }
+      ]
+    },
+    "CKDu_Death": {
+      "type": "Death",
+      "range": { "low": 1, "high": 5, "unit": "years" },
+      "condition_onset": "ESRD_Condition",
+      "codes": [
+        { "system": "SNOMED-CT", "code": "46177005", "display": "End-stage renal disease" }
+      ],
+      "direct_transition": "Terminal"
+    },
+    "Survive_ESRD": { "type": "Terminal" },
+    "Terminal": { "type": "Terminal" }
+  }
+}

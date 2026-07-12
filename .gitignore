@@ -1,0 +1,22 @@
+# Reproducible / downloaded artifacts — rebuilt via the README, never committed.
+# (The Synthea fat-jar ~190 MB, Nemotron parquet cache, full FHIR/CSV output,
+#  full-corpus OMOP db.) The small checked-in samples live in OMOP/ and FHIR/.
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Jupyter / R
+.jupyter-venv/
+.ipynb_checkpoints/
+notebooks/_check.ipynb
+.Rhistory
+
+# OS
+.DS_Store

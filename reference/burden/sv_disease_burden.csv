@@ -1,0 +1,10 @@
+condition,key,metric,sex,age_min,age_max,value,unit,source,confidence,notes
+Type 2 diabetes mellitus,diabetes,prevalence,A,20,120,0.105,proportion,IHME-GBD-2021;PAHO,approx,Adult prevalence ~10-12% per IDF/PAHO
+Hypertension,hypertension,prevalence,A,20,120,0.300,proportion,PAHO;MINSAL-ENECA,approx,Adult prevalence ~25-37%
+Dyslipidemia,dyslipidemia,prevalence,A,20,120,0.220,proportion,MINSAL-ENECA,low,Sparse national estimate
+Obesity (BMI>=30),obesity,prevalence,A,20,120,0.250,proportion,IHME-GBD-2021,approx,Adult obesity ~24-27%
+Chronic kidney disease (all-cause),ckd,prevalence,A,20,120,0.120,proportion,IHME-GBD-2021;PAHO,approx,Elevated vs regional baseline
+CKDu / Mesoamerican nephropathy,ckdu,prevalence,M,18,75,0.180,proportion,Orantes-2011;PAHO,low,"Coastal lowland male agric. workers; hotspot Bajo Lempa"
+CKDu / Mesoamerican nephropathy,ckdu,prevalence,F,18,75,0.040,proportion,Orantes-2011;PAHO,low,Lower female burden
+Dengue,dengue,incidence,A,0,120,900,per_100k_yr,MINSAL-surveillance;PAHO,approx,"Endemic, epidemic years far higher; rainy season May-Oct"
+Dengue (severe),dengue_severe,case_fraction,A,0,120,0.030,proportion_of_cases,MINSAL;PAHO,approx,Fraction of symptomatic cases progressing to severe

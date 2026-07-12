@@ -1,0 +1,5 @@
+DATE,PATIENT,ENCOUNTER,CODE,DESCRIPTION,VALUE,UNITS,TYPE
+2020-01-10T09:00:00Z,aaaa-1111,enc-1,4548-4,Hemoglobin A1c,8.4,%,numeric
+2020-01-10T09:00:00Z,aaaa-1111,enc-1,39156-5,BMI,31.2,kg/m2,numeric
+2020-03-01T08:00:00Z,bbbb-2222,enc-3,4548-4,Hemoglobin A1c,7.1,%,numeric
+2020-01-10T09:00:00Z,aaaa-1111,enc-1,8302-2,Body Height,170,cm,text

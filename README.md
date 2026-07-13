@@ -26,6 +26,20 @@ mapping (OHDSI Athena) is the required next step, lightly simulated here (see be
 
 ---
 
+## Architecture at a glance
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/data-flow-dark.svg">
+  <img alt="Sovereign Health Protocol data-flow: a twin-path FHIR to OMOP to OHDSI pipeline inside a sovereign boundary on in-country compute, with an external partner (PAHO, WHO, or the OHDSI network) bringing standardized surveillance packages in and only aggregated findings out." src="docs/data-flow.svg" width="100%">
+</picture>
+
+*Twin-path FHIR → OMOP → OHDSI on in-country compute. The only things that cross the
+sovereign boundary are the zero-PHI **synthetic corpus** (out) and a partner's standardized
+**surveillance packages** (in) / **aggregated findings** (out) — raw patient data never
+crosses. Full design in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).*
+
+---
+
 ## Why this is built the way it is
 
 **Standardized on OMOP + OHDSI, by design.** By adopting the **OMOP Common Data Model** and

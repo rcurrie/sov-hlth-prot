@@ -10,6 +10,14 @@ SHP is **health-system-agnostic**: the only hard requirement is a standard **FHI
 export**. Any system that can produce de-identified FHIR can drive the production path —
 nothing here is tied to a specific vendor, cloud, or country.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="data-flow-dark.svg">
+  <img alt="Sovereign Health Protocol data-flow: a twin-path FHIR to OMOP to OHDSI pipeline inside a sovereign boundary, with an external partner (PAHO, WHO, or the OHDSI network) bringing standardized surveillance packages in and only aggregated findings out." src="data-flow.svg" width="100%">
+</picture>
+
+*Federated data-flow (theme-aware; renders from `data-flow.svg` / `data-flow-dark.svg` in
+this folder). The ASCII below is the text-only equivalent.*
+
 ```
                          ┌──────────────────────── SAME LOGIC ────────────────────────┐
                          │                                                            │

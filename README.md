@@ -1,32 +1,67 @@
 # The Sovereign Health Protocol (SHP)
 
-The Sovereign Health Protocol (SHP) is an open-source, federated data engine designed to
-advance digital health sovereignty. Operating natively on standard FHIR exports, the
-platform translates complex clinical records into the internationally validated OMOP Common
-Data Model. This enables nations to participate in rigorous, causal public health research
-while guaranteeing that raw patient data never crosses borders. To accelerate safe
-innovation, the architecture relies on a strict **"twin-path"** design: researchers can
-rapidly prototype interventions and AI models inside a high-fidelity synthetic playground
-before executing those exact same analytical workflows against a sovereign, de-identified
-real-world health cloud. Whether tracking infectious disease outbreaks, securing
-international funding, or establishing the verifiable foundation for a localized health-token
-economy, SHP provides the transparent, interoperable infrastructure required to lead modern
-global health.
+The Sovereign Health Protocol (SHP) helps a country turn the health records it *already has*
+into trustworthy answers to real public-health questions — which treatments work, where an
+outbreak is spreading, whether a chronic-disease program is actually helping — **without
+patient records ever leaving the country**. It reads the standard format hospitals already
+export ([FHIR](https://hl7.org/fhir/)) and converts it into a common research format
+([OMOP](https://www.ohdsi.org/data-standardization/)) that ministries of health, universities,
+and funders worldwide already trust. This is not theoretical: the same open analytics toolkit
+SHP builds on ([OHDSI's HADES R packages](https://ohdsi.github.io/Hades/), [peer-reviewed](https://pmc.ncbi.nlm.nih.gov/articles/PMC10868467/))
+has produced published evidence at scale — for example the [LEGEND-HTN study in *The
+Lancet*](https://www.thelancet.com/article/S0140-6736(19)32317-7/fulltext), a **multinational**
+analysis comparing first-line blood-pressure treatments across ~5 million patients and nine
+databases, each analyzed *in place* with only results shared. Because every study is expressed
+against one open, well-documented standard (the [*Book of
+OHDSI*](https://ohdsi.github.io/TheBookOfOhdsi/)), El Salvador can join — and help lead —
+regional evidence networks across the Americas, collaborating with **WHO / PAHO** and
+international partners on equal footing while its citizens' data stays home. Everything in this
+repository first runs on realistic **synthetic** patients — invented records, never real
+people — so the methods are proven safe *before* they ever touch a real record. And because
+that synthetic path is fully open and reproducible, it doubles as a **training ground for
+homegrown health-informatics expertise**, extending El Salvador's substantial national
+investment in AI and engineering education into public health. (This project's synthetic
+population is itself generated from NVIDIA's
+[Nemotron-Personas-El-Salvador](https://huggingface.co/datasets/nvidia/Nemotron-Personas-El-Salvador)
+dataset — an explicitly *Sovereign AI* resource grounded in El Salvador's 2024 national census.)
 
-*This repository is SHP's **synthetic staging path** — the open, zero-PHI playground where
-the analytics are built and validated (against a known answer key) before the production path
-runs the identical workflows on sovereign, de-identified data. It is a **proof of concept**:
-the OMOP conversion and estimator stack run end-to-end today; full production vocabulary
-mapping (OHDSI Athena) is the required next step, lightly simulated here (see below).*
+## Just want to try the notebooks? (start here)
 
-> ⚠️ **Synthetic ≠ evidence.** Zero PHI. Every number here shapes *generation* or
-> *validates an estimator* — never an epidemiological claim about El Salvador. This
-> repository is infrastructure that makes rigorous clinical science possible at scale; the
-> epidemiology is led by the study's investigators.
+No install, no download — open in Colab, then **Runtime ▸ Change runtime type ▸ R**, then Run all:
 
----
+- **OMOP population explorer** — cohort characterization across the synthetic population
+  [→ open in Colab](https://colab.research.google.com/github/rcurrie/sov-hlth-prot/blob/main/notebooks/sv_omop_explorer.ipynb)
+- **FHIR single-patient view** — one patient's raw FHIR R4 bundle
+  [→ open in Colab](https://colab.research.google.com/github/rcurrie/sov-hlth-prot/blob/main/notebooks/sv_fhir_patient.ipynb)
 
-## Architecture at a glance
+Each notebook's `DATA_URL` is pre-wired to this repo's sample files
+([`OMOP/sv_sample100.duckdb`](OMOP/sv_sample100.duckdb),
+[`FHIR/sample_patient_fhir.json`](FHIR/sample_patient_fhir.json)), so they fetch their own
+data automatically on Colab. **Send a researcher either Colab link and they're running in
+~1 minute.**
+
+> The FHIR patient (*Cyndy Ji Monahan*) is the **same person** as OMOP `person_id = 21` —
+> their HbA1c / eGFR curves match across the two views.
+
+
+## Note for IRBs
+Everything in this repository is **synthetic** — patients generated algorithmically to match
+population-level statistics, with **no real records and no protected health information (PHI)**,
+involving **no human subjects and no identifiable private information**; nothing here can be
+traced to, or used to re-identify, any real person. That is by design: SHP is built as a
+**privacy-preserving, minimal-risk architecture**, and this synthetic **staging path** exists
+precisely so that analytic methods can be fully pre-specified, reviewed, and validated *before*
+any real data is involved. The production path is **federated and de-identified**: records are
+de-identified inside the source health system's own secure environment, analyses run against the
+standardized [OMOP](https://www.ohdsi.org/data-standardization/) model *in place*, and **only
+aggregate, non-identifiable results ever leave it** — patient-level data never crosses
+institutional or national borders, and standardizing on [OMOP/OHDSI](https://www.ohdsi.org/methods-demo/)
+keeps each study transparent, pre-specifiable, and reproducible for review. We anticipate and
+welcome IRB oversight as an explicit gate: **no real-world data is accessed until the production
+protocol receives its own IRB approval** — this repository covers only the synthetic staging that
+precedes that step.
+
+## Architecture and Data Flow
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/data-flow-dark.svg">
@@ -38,7 +73,11 @@ sovereign boundary are the zero-PHI **synthetic corpus** (out) and a partner's s
 **surveillance packages** (in) / **aggregated findings** (out) — raw patient data never
 crosses. Full design in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).*
 
----
+⚠️ This repository is SHP's **synthetic staging path** — the open, zero-PHI playground where
+the analytics are built and validated (against a known answer key) before the production path
+runs the identical workflows on sovereign, de-identified data. It is a **proof of concept**:
+the OMOP conversion and estimator stack run end-to-end today; full production vocabulary
+mapping (OHDSI Athena) is the required next step, lightly simulated here (see below).*
 
 ## Why this is built the way it is
 
@@ -78,29 +117,7 @@ FHIR-native health system can feed the production path.
   for example, El Salvador's **DoctorSV** telemedicine platform — via a service such as the
   **Google Cloud Healthcare API** → BigQuery → the *same* OMOP tables and the *same*
   notebooks, with no structural code change. The synthetic path exists to de-risk this one.
-
----
-
-## Just want to try the notebooks? (start here)
-
-No install, no data download — open in Colab, then **Runtime ▸ Change runtime type ▸ R**, then Run all:
-
-- **OMOP population explorer** — cohort characterization across the synthetic population
-  [→ open in Colab](https://colab.research.google.com/github/rcurrie/sov-hlth-prot/blob/main/notebooks/sv_omop_explorer.ipynb)
-- **FHIR single-patient view** — one patient's raw FHIR R4 bundle
-  [→ open in Colab](https://colab.research.google.com/github/rcurrie/sov-hlth-prot/blob/main/notebooks/sv_fhir_patient.ipynb)
-
-Each notebook's `DATA_URL` is pre-wired to this repo's sample files
-([`OMOP/sv_sample100.duckdb`](OMOP/sv_sample100.duckdb),
-[`FHIR/sample_patient_fhir.json`](FHIR/sample_patient_fhir.json)), so they fetch their own
-data automatically on Colab. **Send a researcher either Colab link and they're running in
-~1 minute.**
-
-> The FHIR patient (*Cyndy Ji Monahan*) is the **same person** as OMOP `person_id = 21` —
-> their HbA1c / eGFR curves match across the two views.
-
----
-
+  
 ## Repository layout
 
 ```
@@ -128,8 +145,6 @@ Everything under `data/` is **rebuilt locally** from the steps below and is neve
 (the Synthea fat-jar ~190 MB, the Nemotron parquet cache, the full FHIR/CSV output, the
 full-corpus OMOP db). The small samples in `OMOP/` and `FHIR/` are the only data in git.
 
----
-
 ## Requirements
 
 | Need | Version / note |
@@ -141,8 +156,6 @@ full-corpus OMOP db). The small samples in `OMOP/` and `FHIR/` are the only data
 | **Network** | HuggingFace (Nemotron parquet, streamed) + GitHub (Synthea fat-jar) — only for the Synthea generation step. |
 
 Python deps: `duckdb`, `numpy`, `pandas`, `scipy`, `scikit-learn`, `pyyaml` (+ `pytest` dev).
-
----
 
 ## Reproduce everything locally
 
@@ -190,8 +203,6 @@ shp study diabetes
 shp build-samples                   # OMOP/sv_sample100.duckdb + FHIR/sample_patient_fhir.json
 ```
 
----
-
 ## Run the notebooks locally (R kernel)
 
 Colab needs none of this; only for editing/running on your own machine.
@@ -219,8 +230,6 @@ Open either notebook, pick the **R** kernel, Run all. Each auto-discovers its da
   --ExecutePreprocessor.kernel_name=ir --output _check.ipynb notebooks/sv_omop_explorer.ipynb
 ```
 
----
-
 ## Honest limits
 
 - **Synthetic ≠ evidence.** The study validates *estimators* — you only recover the
@@ -237,7 +246,5 @@ Open either notebook, pick the **R** kernel, Run all. Each auto-discovers its da
   OHDSI Postgres + Atlas/WebAPI stack. Columns follow the v5.4 spec so records port.
 - **Descriptive notebooks only** — treatment arms in raw synthetic data are too thin for a
   valid comparative-effectiveness estimate; the causal answer-key lives in `study/`.
-
----
 
 *License: Apache-2.0. Everything in this repository is synthetic and contains zero PHI.*
